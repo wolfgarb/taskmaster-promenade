@@ -81,15 +81,6 @@ $("#task-form-modal .btn-primary").click(function() {
   }
 });
 
-// remove all tasks
-$("#remove-tasks").on("click", function() {
-  for (var key in tasks) {
-    tasks[key].length = 0;
-    $("#list-" + key).empty();
-  }
-  saveTasks();
-});
-
 $(".list-group").on("click", "p", function() {
     var text = $(this)
     .text()
@@ -103,10 +94,7 @@ $(this).replaceWith(textInput);
 });
 
 $(".list-group").on("blur", "textarea", function() {
-    var text = $(this)
-    .val()
-    .trim();
-
+    var text = $(this).val();
     var status = $(this)
     .closest(".list-group")
     .attr("id")
@@ -142,14 +130,12 @@ $(this).replaceWith(dateInput);
 });
 
 $(".list-group").on("blur", "input[type='text']", function() {
-    var date = $(this)
-    .val()
-    .trim();
+    var date = $(this).val();
 
     var status = $(this)
     .closest(".list-group")
     .attr("id")
-    .replace("list-", "")
+    .replace("list-", "");
 
     var index = $(this)
     .closest(".list-group-item")
@@ -162,9 +148,16 @@ $(".list-group").on("blur", "input[type='text']", function() {
     .addClass("badge badge-primary badge-pill")
     .text(date);
 
-$(this).replaceWith(taskSpan);
+    $(this).replaceWith(taskSpan);
 });
-
+// remove all tasks
+$("#remove-tasks").on("click", function() {
+    for (var key in tasks) {
+      tasks[key].length = 0;
+      $("#list-" + key).empty();
+    }
+    saveTasks();
+  });
 
 // load tasks for the first time
 loadTasks();
