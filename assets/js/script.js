@@ -44,9 +44,6 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
-
-
-
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
   // clear values
@@ -81,6 +78,7 @@ $("#task-form-modal .btn-primary").click(function() {
   }
 });
 
+// click on task description to edit the task and focus on text box
 $(".list-group").on("click", "p", function() {
     var text = $(this)
     .text()
@@ -93,6 +91,7 @@ $(this).replaceWith(textInput);
     textInput.trigger("focus");
 });
 
+// user clicks outside of textbox, it will auto save and revert to normal display with updated text
 $(".list-group").on("blur", "textarea", function() {
     var text = $(this).val();
     var status = $(this)
@@ -114,6 +113,7 @@ $(".list-group").on("blur", "textarea", function() {
 $(this).replaceWith(taskP);
 });
 
+// user wants to edit task date, it will focus on text box and allow them to edit
 $(".list-group").on("click", "span", function() {
     var date = $(this)
     .text()
@@ -129,6 +129,7 @@ $(this).replaceWith(dateInput);
     dateInput.trigger("focus");
 });
 
+// user clicks out of textbox, it will auto save and revert to normal display with updated date
 $(".list-group").on("blur", "input[type='text']", function() {
     var date = $(this).val();
 
@@ -150,6 +151,7 @@ $(".list-group").on("blur", "input[type='text']", function() {
 
     $(this).replaceWith(taskSpan);
 });
+
 // remove all tasks
 $("#remove-tasks").on("click", function() {
     for (var key in tasks) {
