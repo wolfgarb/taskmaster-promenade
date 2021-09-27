@@ -13,6 +13,8 @@ var createTask = function(taskText, taskDate, taskList) {
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
+  // check due date
+  auditTask(taskLi);
 
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
@@ -44,6 +46,18 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+var auditTask = function(taskEl) {
+  var date = $(taskEl).find("span").text().trim();
+  var time = moment(date, "L").set("hour", 17);
+  $(taskEl).removeClass("list-group-item-warning list-group-item-danger")
+  if (moment().isAfter(time)) {
+    $(taskEl).addClass("list-group-item-danger");
+  } 
+  else if (Math.abs(moment().diff(time, "days")) <=2) {
+    $(taskEl).addClass("list-group-item-warning");
+  }
+};
+
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
   // clear values
@@ -54,6 +68,11 @@ $("#task-form-modal").on("show.bs.modal", function() {
 $("#task-form-modal").on("shown.bs.modal", function() {
   // highlight textarea
   $("#modalTaskDescription").trigger("focus");
+});
+
+// add datepicker UI to modal
+$("#modalDueDate").datepicker({
+  minDate: 1
 });
 
 // save button in modal was clicked
@@ -115,9 +134,7 @@ $(this).replaceWith(taskP);
 
 // user wants to edit task date, it will focus on text box and allow them to edit
 $(".list-group").on("click", "span", function() {
-    var date = $(this)
-    .text()
-    .trim();
+    var date = $(this).text().trim();
 
     var dateInput = $("<input>")
     .attr("type", "text")
@@ -126,11 +143,19 @@ $(".list-group").on("click", "span", function() {
 
 $(this).replaceWith(dateInput);
 
+// jquery datepicker
+  dateInput.datepicker({
+    minDate: 1,
+    onClose: function() {
+      $(this).trigger("change");
+    }
+  });
+
     dateInput.trigger("focus");
 });
 
 // user clicks out of textbox, it will auto save and revert to normal display with updated date
-$(".list-group").on("blur", "input[type='text']", function() {
+$(".list-group").on("change", "input[type='text']", function() {
     var date = $(this).val();
 
     var status = $(this)
@@ -150,6 +175,9 @@ $(".list-group").on("blur", "input[type='text']", function() {
     .text(date);
 
     $(this).replaceWith(taskSpan);
+
+    // pass task <li> el into auditTask to check new due date
+    auditTask($(taskSpan).closest(".list-group-item"));
 });
 
 //make list items sortable
@@ -158,18 +186,6 @@ $(".card .list-group").sortable({
   scroll: false,
   tolerance: "pointer",
   helper: "clone",
-  // activate: function(event) {
-  //   console.log("activate", this);
-  // },
-  // deactivate: function(event) {
-  //   console.log("deactivate", this);
-  // },
-  // over: function(event) {
-  //   console.log("over", event.target);
-  // },
-  // out: function(event) {
-  //   console.log("out", event.target);
-  // },
   update: function(event) {
     // empty array for task data
     var tempArr = [];
