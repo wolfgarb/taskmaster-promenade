@@ -70,13 +70,8 @@ $("#task-form-modal").on("shown.bs.modal", function() {
   $("#modalTaskDescription").trigger("focus");
 });
 
-// add datepicker UI to modal
-$("#modalDueDate").datepicker({
-  minDate: 1
-});
-
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -186,34 +181,48 @@ $(".card .list-group").sortable({
   scroll: false,
   tolerance: "pointer",
   helper: "clone",
-  update: function(event) {
+  activate: function(event, ui) {
+    $(this).addClass(".dropover");
+    $(".bottom-trash").addClass("bottom-trash-drag");
+  },
+  deactivate: function(event, ui) {
+    $(this).removeClass(".dropover");
+    $(".bottom-trash").removeClass("bottom-trash-drag");
+  },
+  over: function(event) {
+    $(event.target).addClass("dropover-active");
+  },
+  out: function(event) {
+    $(event.target).removeClass("dropover-active");
+  },
+  update: function() {
     // empty array for task data
     var tempArr = [];
     // loop over current set of children in sortable list
     $(this).children().each(function() {
-
-      var text = $(this)
+        // save values in temp array
+      tempArr.push({
+      text: $(this)
       .find("p")
       .text()
-      .trim();
-      var date = $(this)
+      .trim(),
+      date: $(this)
       .find("span")
       .text()
-      .trim();
-
-    // add task data to the temp array as an object
-    tempArr.push({
-      text: text,
-      date: date
+      .trim()
     });
-});
-      var arrName = $(this)
+  });
+
+    var arrName = $(this)
       .attr("id")
       .replace("list-", "");
     
     //update array on task data and save
     tasks[arrName] = tempArr;
     saveTasks();
+  },
+  stop: function(event) {
+    $(this).removeClass("dropover");
   }
 });
 
@@ -222,7 +231,20 @@ $("#trash").droppable({
   tolerance: "touch",
   drop: function(event, ui) {
     ui.draggable.remove();
+    $(".bottom-trash").removeClass("bottom-trash-active");
+  },
+  over: function(event, ui) {
+    console.log(ui);
+    $(".bottom-trash").addClass("bottom-trash-active");
+  },
+  out: function(event, ui) {
+    $(".bottom-trash").removeClass("bottom-trash-active");
   }
+});
+
+// add datepicker UI to modal
+$("#modalDueDate").datepicker({
+  minDate: 1
 });
 
 // remove all tasks
@@ -236,3 +258,9 @@ $("#remove-tasks").on("click", function() {
 
 // load tasks for the first time
 loadTasks();
+
+setInterval(function () {
+  $(".card .list-group-item").each(function(index, el) {
+    auditTask(el);
+  });
+}, (1000 * 60) * 30);
